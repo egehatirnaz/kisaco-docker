@@ -1,4 +1,4 @@
 [submodule "kisaco-backend"]
 	path = kisaco-backend
-	url = git@github.com:egehatirnaz/kisaco-backend.git
+	url = https://github.com/egehatirnaz/kisaco-backend.git
 	branch = master
