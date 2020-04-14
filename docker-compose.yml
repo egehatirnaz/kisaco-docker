@@ -1,36 +1,41 @@
-version: '3'
+version: '3.3'
 services:
-  api:
-    container_name: kisaco_app
-    build: .
-    ports:
-      - "8080:8080"
-
-  #######################################
-  # MySQL server
-  #######################################
   db:
-    image: mysql:5.7.25
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_DATABASE: kisaco_db
-      MYSQL_ROOT_PASSWORD: pass
+    image: mysql:latest
+    container_name: mysql-db2
     volumes:
       - ./mysql-dump:/docker-entrypoint-initdb.d
-    networks:
-      - default
-
-  #######################################
-  # PHP MY ADMIN
-  #######################################
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    links:
-      - db:db
-    ports:
-      - 8081:80
     environment:
-      MYSQL_USER: user
-      MYSQL_PASSWORD: pass
-      MYSQL_ROOT_PASSWORD: pass
+      - MYSQL_ROOT_PASSWORD=pass
+      - MYSQL_USER=root
+    ports:
+      - "3306:3306"
+    restart: always
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: kisaco_pma
+    ports:
+      - "8081:80"
+    restart: always
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: pass
+
+  api:
+    container_name: kisaco_app
+    image: kisaco_app_image
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db2:3306/kisaco_db?createDatabaseIfNotExist=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: pass
+    depends_on:
+      - db
